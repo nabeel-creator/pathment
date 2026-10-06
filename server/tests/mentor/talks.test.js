@@ -5,7 +5,7 @@
 const request = require('supertest');
 const app = require('../../src/index');
 const { models } = require('../../src/db');
-const { cleanDb, createMentor, createMentee, createAdmin, authHeader } = require('../helpers/seed');
+const { cleanDb, createMentor, createMentee, createAdmin, createProgram, createClan, authHeader } = require('../helpers/seed');
 
 const post = (user, path, body) =>
   request(app).post(`/api/talks${path}`).set('Authorization', authHeader(user)).send(body);
@@ -21,6 +21,10 @@ describe('talks library', () => {
     mentor = await createMentor({ email: 'mentor@test.com' });
     otherMentor = await createMentor({ email: 'other@test.com' });
     mentee = await createMentee({ email: 'mentee@test.com' });
+
+    const program = await createProgram({ createdBy: admin.id });
+    await createClan({ programId: program.id, leadMentor: mentor, coMentors: [otherMentor] });
+
     tech = (await post(admin, '/categories', { name: 'Technology' })).body.data.category;
     mindset = (await post(admin, '/categories', { name: 'Mindset' })).body.data.category;
   });
